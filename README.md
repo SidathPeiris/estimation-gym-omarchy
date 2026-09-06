@@ -22,17 +22,17 @@ _(add a screenshot once you've used it for a few days)_
 
 ```bash
 mkdir -p ~/.config/omarchy/plugins
-cp -a estimation-gym ~/.config/omarchy/plugins/estimation-gym
+git clone https://github.com/SidathPeiris/estimation-gym-omarchy.git ~/.config/omarchy/plugins/estimation-gym
 omarchy plugin validate ~/.config/omarchy/plugins/estimation-gym
 omarchy plugin enable sidath.estimation-gym
 omarchy restart shell
 ```
 
-For local development, symlink instead of copying so edits take effect on
-the shell's live-reload:
+For local development, symlink your working copy instead of cloning so edits
+take effect on the shell's live-reload:
 
 ```bash
-ln -s "$(pwd)/estimation-gym" ~/.config/omarchy/plugins/estimation-gym
+ln -s "$(pwd)" ~/.config/omarchy/plugins/estimation-gym
 ```
 
 ## Remove
@@ -57,9 +57,9 @@ rm -rf ~/.local/state/estimation-gym   # optional: also clears your streak/histo
 ## Develop / test
 
 ```bash
-node estimation-gym/Model.test.js          # scoring/streak/day-selection logic
-omarchy plugin validate estimation-gym     # manifest schema check
-qmllint -I /usr/share/omarchy/shell estimation-gym/Widget.qml   # QML lint (best-effort; the qs.* shell modules aren't fully resolvable by plain qmllint)
+node Model.test.js          # scoring/streak/day-selection logic
+omarchy plugin validate .   # manifest schema check
+qmllint -I /usr/share/omarchy/shell Widget.qml   # QML lint (best-effort; the qs.* shell modules aren't fully resolvable by plain qmllint)
 ```
 
 State lives at `~/.local/state/estimation-gym/state.json`. Delete it to reset
@@ -68,13 +68,12 @@ your streak/history.
 ## Project layout
 
 ```
-estimation-gym/
-├── manifest.json          # plugin id, kind (bar-widget), entry point
-├── Widget.qml             # bar chip + popup panel UI
-├── Model.js               # pure logic: day selection, scoring, streaks (unit-testable with plain node)
-├── Model.test.js
-└── content/
-    └── questions.js       # the question bank
+manifest.json          # plugin id, kind (bar-widget), entry point
+Widget.qml             # bar chip + popup panel UI
+Model.js               # pure logic: day selection, scoring, streaks (unit-testable with plain node)
+Model.test.js
+content/
+└── questions.js       # the question bank
 ```
 
 ## Dependencies
