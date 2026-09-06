@@ -21,18 +21,17 @@ _(add a screenshot once you've used it for a few days)_
 ## Install
 
 ```bash
-mkdir -p ~/.config/omarchy/plugins
-git clone https://github.com/SidathPeiris/estimation-gym-omarchy.git ~/.config/omarchy/plugins/estimation-gym
-omarchy plugin validate ~/.config/omarchy/plugins/estimation-gym
-omarchy plugin enable sidath.estimation-gym
+omarchy plugin add https://github.com/SidathPeiris/estimation-gym-omarchy.git --enable
 omarchy restart shell
 ```
 
-For local development, symlink your working copy instead of cloning so edits
-take effect on the shell's live-reload:
+This clones the repo into `~/.config/omarchy/plugins/sidath.estimation-gym`
+and enables it. For local development, symlink your working copy instead so
+edits take effect on the shell's live-reload:
 
 ```bash
 ln -s "$(pwd)" ~/.config/omarchy/plugins/estimation-gym
+omarchy plugin enable sidath.estimation-gym
 ```
 
 ## Remove
