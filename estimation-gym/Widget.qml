@@ -1,0 +1,330 @@
+import QtQuick
+import Quickshell
+import Quickshell.Io
+import qs.Commons
+import qs.Ui
+import "Model.js" as Model
+import "content/questions.js" as QuestionBank
+
+// Daily Fermi-estimation puzzle. Bar chip shows today's status + current
+// streak; clicking opens a panel with the question, a numeric guess field,
+// and (after submitting) the order-of-magnitude scoring breakdown.
+Panel {
+  id: root
+
+  ipcTarget: "estimation-gym"
+
+  readonly property color foreground: bar ? bar.foreground : Color.foreground
+  readonly property color dim: Qt.darker(foreground, 1.55)
+  readonly property color urgent: bar ? bar.urgent : Color.urgent
+  readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
+
+  readonly property int today: Model.dayIndex(new Date())
+  readonly property var question: Model.questionForDay(today, QuestionBank.QUESTIONS)
+  readonly property bool answeredToday: Model.hasAnsweredDay(stateData, today)
+  readonly property var todayResult: answeredToday ? stateData.history[String(today)] : null
+
+  property string guessText: ""
+  property string guessError: ""
+  property var stateData: Model.emptyState()
+  readonly property string statePath: Quickshell.env("HOME") + "/.local/state/estimation-gym/state.json"
+
+  function loadState(raw) {
+    try {
+      var parsed = JSON.parse(raw)
+      // A missing/first-run file parses to "{}", which is a valid object but
+      // not a valid state shape - only trust it once it has a history field.
+      stateData = (parsed && typeof parsed === "object" && parsed.history !== undefined)
+        ? parsed
+        : Model.emptyState()
+    } catch (e) {
+      stateData = Model.emptyState()
+    }
+  }
+
+  function saveState() {
+    stateFile.setText(JSON.stringify(root.stateData, null, 2) + "\n")
+  }
+
+  function bandColor(band) {
+    if (band === "Bullseye") return Color.accent
+    if (band === "Close") return Color.accent
+    if (band === "Ballpark") return foreground
+    return urgent
+  }
+
+  function submitGuess() {
+    var guess = Number(guessText)
+    if (guessText.trim() === "" || !isFinite(guess) || guess <= 0) {
+      guessError = qsTr("Enter a positive number")
+      return
+    }
+    guessError = ""
+    stateData = Model.recordAnswer(stateData, today, guess, question.answerValue)
+    saveState()
+  }
+
+  onOpenedChanged: {
+    if (!opened || answeredToday) return
+    Qt.callLater(function() { guessInput.forceActiveFocus() })
+  }
+
+  // mkdir -p as a defensive fallback in case FileView doesn't create the
+  // state directory itself on first write.
+  Process {
+    id: ensureStateDir
+    command: ["mkdir", "-p", Quickshell.env("HOME") + "/.local/state/estimation-gym"]
+    running: true
+  }
+
+  FileView {
+    id: stateFile
+    path: root.statePath
+    watchChanges: true
+    atomicWrites: true
+    printErrors: false
+    onLoaded: root.loadState(text())
+    onLoadFailed: root.loadState("{}")
+    onFileChanged: reload()
+  }
+
+  implicitWidth: button.implicitWidth
+  implicitHeight: button.implicitHeight
+
+  Item {
+    id: button
+
+    readonly property bool vertical: root.bar ? root.bar.vertical : false
+    readonly property int barSize: root.bar ? root.bar.barSize : Style.bar.sizeHorizontal
+    property var registeredBar: null
+
+    implicitWidth: vertical ? barSize : chipRow.implicitWidth + Style.space(12)
+    implicitHeight: barSize
+
+    function syncClickRegistration() {
+      if (registeredBar && registeredBar.unregisterClickTarget) registeredBar.unregisterClickTarget(button)
+      registeredBar = root.bar
+      if (registeredBar && registeredBar.registerClickTarget) registeredBar.registerClickTarget(button)
+    }
+
+    Component.onCompleted: syncClickRegistration()
+    Component.onDestruction: if (registeredBar && registeredBar.unregisterClickTarget) registeredBar.unregisterClickTarget(button)
+
+    Connections {
+      target: root
+      function onBarChanged() { button.syncClickRegistration() }
+    }
+
+    Row {
+      id: chipRow
+      anchors.centerIn: parent
+      spacing: Style.space(5)
+
+      Text {
+        text: "\u{1F3AF}" // target emoji: today's estimation target
+        font.pixelSize: Style.font.body
+        anchors.verticalCenter: parent.verticalCenter
+      }
+
+      Text {
+        text: root.answeredToday
+          ? root.todayResult.band + (root.stateData.streak > 0 ? " · x" + root.stateData.streak : "")
+          : qsTr("Guess")
+        color: root.answeredToday ? root.bandColor(root.todayResult.band) : root.foreground
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.bodySmall
+        font.bold: true
+        anchors.verticalCenter: parent.verticalCenter
+      }
+    }
+
+    MouseArea {
+      anchors.fill: parent
+      hoverEnabled: true
+      cursorShape: Qt.PointingHandCursor
+      onEntered: if (root.bar) root.bar.showTooltip(button, qsTr("Today's estimation puzzle"))
+      onExited: if (root.bar) root.bar.hideTooltip(button)
+      onClicked: root.toggle()
+    }
+  }
+
+  KeyboardPanel {
+    id: panel
+
+    anchorItem: button
+    owner: root
+    bar: root.bar
+    open: root.opened
+    focusTarget: keyCatcher
+    contentWidth: panel.fittedContentWidth(Style.space(360))
+    contentHeight: panel.fittedContentHeight(content.implicitHeight, Style.space(480))
+
+    PanelKeyCatcher {
+      id: keyCatcher
+
+      anchors.fill: parent
+      // Without this, PanelKeyCatcher's BeforeItem key priority would swallow
+      // Enter/arrow keys meant for the guess field (see its own doc comment
+      // on the inline-editor pattern).
+      blocked: guessInput.activeFocus
+      onCloseRequested: root.close()
+
+      Column {
+        id: content
+        width: parent.width
+        spacing: Style.space(12)
+
+        PanelHero {
+          width: parent.width
+          title: qsTr("Estimation Gym")
+          meta: qsTr("Puzzle #%1").arg(root.today)
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+        }
+
+        Text {
+          width: parent.width
+          text: qsTr("Streak %1 · Best %2").arg(root.stateData.streak).arg(root.stateData.bestStreak)
+          color: root.dim
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.caption
+        }
+
+        Text {
+          width: parent.width
+          text: root.question ? root.question.prompt : qsTr("No question available")
+          color: root.foreground
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.body
+          wrapMode: Text.WordWrap
+        }
+
+        // --- Not yet answered: guess input ---
+        Column {
+          width: parent.width
+          spacing: Style.space(8)
+          visible: !root.answeredToday
+
+          Row {
+            width: parent.width
+            spacing: Style.space(8)
+
+            TextField {
+              id: guessInput
+              width: parent.width - submitButton.width - Style.space(8)
+              anchors.verticalCenter: parent.verticalCenter
+              foreground: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.body
+              text: root.guessText
+              placeholderText: root.question ? qsTr("Guess (%1)").arg(root.question.unit) : ""
+              validator: DoubleValidator { bottom: 0; notation: DoubleValidator.ScientificNotation }
+              onTextChanged: root.guessText = text
+              onAccepted: root.submitGuess()
+            }
+
+            PanelActionButton {
+              id: submitButton
+              anchors.verticalCenter: parent.verticalCenter
+              iconText: qsTr("Go")
+              tooltipText: qsTr("Submit guess")
+              foreground: root.foreground
+              fontFamily: root.fontFamily
+              onClicked: root.submitGuess()
+            }
+          }
+
+          Text {
+            visible: root.guessError !== ""
+            text: root.guessError
+            color: root.urgent
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+          }
+        }
+
+        // --- Answered: result breakdown ---
+        Column {
+          width: parent.width
+          spacing: Style.space(10)
+          visible: root.answeredToday
+
+          BorderSurface {
+            width: parent.width
+            implicitHeight: resultContent.implicitHeight + Style.space(24)
+            color: Style.normalFillFor(root.foreground, root.bandColor(root.todayResult ? root.todayResult.band : "Off"))
+            borderSpec: Border.controlSpec("normal", root.foreground, root.bandColor(root.todayResult ? root.todayResult.band : "Off"))
+            radius: Style.cornerRadius
+
+            Column {
+              id: resultContent
+              anchors.fill: parent
+              anchors.margins: Style.space(12)
+              spacing: Style.space(6)
+
+              Text {
+                text: root.todayResult ? root.todayResult.band : ""
+                color: root.bandColor(root.todayResult ? root.todayResult.band : "Off")
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.heading
+                font.bold: true
+              }
+
+              Text {
+                width: parent.width
+                text: root.todayResult
+                  ? qsTr("Your guess: %1 %2").arg(Model.formatCompact(root.todayResult.guess)).arg(root.question.unit)
+                  : ""
+                color: root.foreground
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.bodySmall
+                wrapMode: Text.WordWrap
+              }
+
+              Text {
+                width: parent.width
+                text: root.question
+                  ? qsTr("Actual: %1 %2").arg(Model.formatCompact(root.question.answerValue)).arg(root.question.unit)
+                  : ""
+                color: root.foreground
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.bodySmall
+                wrapMode: Text.WordWrap
+              }
+
+              Text {
+                width: parent.width
+                text: root.todayResult
+                  ? qsTr("Off by %1 orders of magnitude").arg(root.todayResult.distanceDecades !== null ? root.todayResult.distanceDecades.toFixed(2) : "?")
+                  : ""
+                color: root.dim
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.caption
+              }
+            }
+          }
+
+          Text {
+            width: parent.width
+            text: root.question ? qsTr("How to think about it: %1").arg(root.question.decompositionHint) : ""
+            color: root.dim
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+            wrapMode: Text.WordWrap
+          }
+
+          Text {
+            width: parent.width
+            visible: root.question && root.question.source
+            text: root.question ? qsTr("Source: %1").arg(root.question.source) : ""
+            color: root.dim
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+            font.italic: true
+            wrapMode: Text.WordWrap
+          }
+        }
+      }
+    }
+  }
+}

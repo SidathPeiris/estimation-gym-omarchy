@@ -1,0 +1,80 @@
+# Estimation Gym
+
+A daily Fermi-estimation puzzle for the [Omarchy](https://omarchy.org) shell bar.
+
+Every calendar day everyone sees the same question - a real-world quantity
+you have to estimate ("how many piano tuners are there in Chicago?"), in the
+spirit of the classic Fermi problem. You're scored on **order-of-magnitude
+closeness** (Bullseye / Close / Ballpark / Off), not exact value, because
+getting within a factor of 10 of a hard question is a genuinely useful skill,
+and getting the exact number is not the point. Answering builds a daily
+streak; after you answer, the widget reveals a decomposition hint showing how
+to break the estimate down.
+
+No account, no server, no network calls - the question bank ships with the
+plugin and your history/streak live in a local JSON file.
+
+## Screenshot
+
+_(add a screenshot once you've used it for a few days)_
+
+## Install
+
+```bash
+mkdir -p ~/.config/omarchy/plugins
+cp -a estimation-gym ~/.config/omarchy/plugins/estimation-gym
+omarchy plugin validate ~/.config/omarchy/plugins/estimation-gym
+omarchy plugin enable sidath.estimation-gym
+omarchy restart shell
+```
+
+For local development, symlink instead of copying so edits take effect on
+the shell's live-reload:
+
+```bash
+ln -s "$(pwd)/estimation-gym" ~/.config/omarchy/plugins/estimation-gym
+```
+
+## Usage
+
+- Click the bar chip to open today's puzzle.
+- Type a numeric guess and press Enter (or click "Go").
+- After answering, the panel shows your guess vs. the actual value, how many
+  orders of magnitude off you were, a hint for how to decompose the estimate
+  next time, and your current/best streak.
+- One puzzle per calendar day; the bar chip shows your streak once you've
+  answered.
+
+## Develop / test
+
+```bash
+node estimation-gym/Model.test.js          # scoring/streak/day-selection logic
+omarchy plugin validate estimation-gym     # manifest schema check
+qmllint -I /usr/share/omarchy/shell estimation-gym/Widget.qml   # QML lint (best-effort; the qs.* shell modules aren't fully resolvable by plain qmllint)
+```
+
+State lives at `~/.local/state/estimation-gym/state.json`. Delete it to reset
+your streak/history.
+
+## Project layout
+
+```
+estimation-gym/
+├── manifest.json          # plugin id, kind (bar-widget), entry point
+├── Widget.qml             # bar chip + popup panel UI
+├── Model.js               # pure logic: day selection, scoring, streaks (unit-testable with plain node)
+├── Model.test.js
+└── content/
+    └── questions.js       # the question bank
+```
+
+## Status
+
+Personal-use plugin, not yet submitted to the
+[Omarchy plugin marketplace](https://plugins.omarchy.org). If it holds up to
+daily use it may get submitted there, and/or become the basis for a mobile
+version.
+
+## License
+
+MIT

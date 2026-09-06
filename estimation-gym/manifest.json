@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "sidath.estimation-gym",
+  "name": "Estimation Gym",
+  "version": "0.1.0",
+  "author": "sidath",
+  "license": "MIT",
+  "description": "Daily Fermi-estimation puzzle: guess real-world quantities, scored on order-of-magnitude closeness.",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "Widget.qml"
+  },
+  "barWidget": {
+    "displayName": "Estimation Gym",
+    "description": "Daily order-of-magnitude estimation puzzle with streaks.",
+    "category": "Widgets",
+    "allowMultiple": false
+  }
+}
