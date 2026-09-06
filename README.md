@@ -35,6 +35,15 @@ the shell's live-reload:
 ln -s "$(pwd)/estimation-gym" ~/.config/omarchy/plugins/estimation-gym
 ```
 
+## Remove
+
+```bash
+omarchy plugin disable sidath.estimation-gym
+omarchy plugin remove sidath.estimation-gym
+omarchy restart shell
+rm -rf ~/.local/state/estimation-gym   # optional: also clears your streak/history
+```
+
 ## Usage
 
 - Click the bar chip to open today's puzzle.
@@ -68,12 +77,16 @@ estimation-gym/
     └── questions.js       # the question bank
 ```
 
+## Dependencies
+
+None beyond Omarchy/Quickshell itself (uses the shared `qs.Ui`/`qs.Commons`
+shell components and `Quickshell.Io` for local file persistence). No network
+access, no external services, no extra system packages.
+
 ## Status
 
-Personal-use plugin, not yet submitted to the
-[Omarchy plugin marketplace](https://plugins.omarchy.org). If it holds up to
-daily use it may get submitted there, and/or become the basis for a mobile
-version.
+Built for personal daily use; submitted to the
+[Omarchy plugin marketplace](https://plugins.omarchy.org) for listing.
 
 ## License
 
