@@ -32,6 +32,8 @@ Panel {
   property bool hintShown: false
   readonly property var strategy: question ? Model.strategyFor(question) : null
   property bool statsExpanded: false
+  property bool historyExpanded: false
+  readonly property var historyDays: Model.historyDays(stateData)
   // Open until the first day is played, where "how to play" is the whole
   // question, then collapsed so it stays clear of the daily puzzle.
   property bool howToExpanded: !hasAnyHistory
@@ -524,6 +526,7 @@ Panel {
               model: Model.scoringRows()
 
               Item {
+                id: scoreRow
                 required property var modelData
                 width: parent.width
                 implicitHeight: scoreBand.implicitHeight
@@ -531,8 +534,8 @@ Panel {
                 Text {
                   id: scoreBand
                   anchors.left: parent.left
-                  text: modelData.band
-                  color: root.bandColor(modelData.band)
+                  text: scoreRow.modelData.band
+                  color: root.bandColor(scoreRow.modelData.band)
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.caption
                   font.bold: true
@@ -542,7 +545,7 @@ Panel {
                   anchors.left: scoreBand.right
                   anchors.leftMargin: Style.space(8)
                   anchors.baseline: scoreBand.baseline
-                  text: modelData.meaning
+                  text: scoreRow.modelData.meaning
                   color: root.dim
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.caption
@@ -551,7 +554,7 @@ Panel {
                 Text {
                   anchors.right: parent.right
                   anchors.baseline: scoreBand.baseline
-                  text: qsTr("%1 pts").arg(modelData.points)
+                  text: qsTr("%1 pts").arg(scoreRow.modelData.points)
                   color: root.dim
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.caption
@@ -574,6 +577,150 @@ Panel {
                 font.family: root.fontFamily
                 font.pixelSize: Style.font.caption
                 wrapMode: Text.WordWrap
+              }
+            }
+          }
+        }
+
+        // --- History: a horizontal strip ---
+        //
+        // Scrolls sideways rather than growing a list downwards. The popup is
+        // already tall with the result, the guide and the stats panel, and a
+        // vertical history would push it past the screen after a few weeks.
+        // A fixed-height strip costs the same whether there are three days in
+        // it or three hundred.
+        Column {
+          width: parent.width
+          spacing: Style.space(8)
+          visible: root.historyDays.length > 0
+
+          Rectangle {
+            width: parent.width
+            height: 1
+            color: root.dim
+            opacity: 0.3
+          }
+
+          Item {
+            width: parent.width
+            implicitHeight: historyToggle.implicitHeight
+
+            Text {
+              id: historyToggle
+              anchors.left: parent.left
+              text: (root.historyExpanded ? "▾ " : "▸ ") + qsTr("History")
+              color: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.bodySmall
+              font.bold: true
+            }
+
+            Text {
+              anchors.right: parent.right
+              anchors.baseline: historyToggle.baseline
+              text: root.historyDays.length === 1
+                ? qsTr("1 day")
+                : qsTr("%1 days").arg(root.historyDays.length)
+              color: root.dim
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+            }
+
+            MouseArea {
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: root.historyExpanded = !root.historyExpanded
+            }
+          }
+
+          ListView {
+            id: historyStrip
+            visible: root.historyExpanded
+            width: parent.width
+            height: 74
+            orientation: ListView.Horizontal
+            spacing: Style.space(6)
+            clip: true
+            // Newest first, so the strip opens on the most recent day.
+            model: root.historyDays
+            boundsBehavior: Flickable.StopAtBounds
+
+            // A vertical wheel is what a mouse actually produces over this
+            // strip, so map it onto the horizontal axis rather than ignoring it.
+            WheelHandler {
+              target: null
+              onWheel: function (event) {
+                var delta = event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x
+                historyStrip.contentX = Math.max(
+                  0,
+                  Math.min(
+                    historyStrip.contentWidth - historyStrip.width,
+                    historyStrip.contentX - delta
+                  )
+                )
+              }
+            }
+
+            delegate: Rectangle {
+              id: historyCard
+              required property var modelData
+
+              width: 104
+              height: historyStrip.height
+              radius: Style.cornerRadius
+              color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.05)
+              border.width: 1
+              border.color: Qt.rgba(root.dim.r, root.dim.g, root.dim.b, 0.35)
+
+              Column {
+                anchors.fill: parent
+                anchors.margins: Style.space(7)
+                spacing: Style.space(3)
+
+                Text {
+                  width: parent.width
+                  text: Model.formatDay(historyCard.modelData.day)
+                  color: root.dim
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                  elide: Text.ElideRight
+                }
+
+                Text {
+                  width: parent.width
+                  text: historyCard.modelData.entry.band +
+                        (historyCard.modelData.entry.assisted ? " ·" : "")
+                  color: root.bandColor(historyCard.modelData.entry.band)
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                  font.bold: true
+                  elide: Text.ElideRight
+                }
+
+                Text {
+                  width: parent.width
+                  text: Model.formatCompact(historyCard.modelData.entry.guess) + " / " +
+                        (historyCard.modelData.entry.answerValue !== undefined
+                          ? Model.formatCompact(historyCard.modelData.entry.answerValue)
+                          : "?")
+                  color: root.foreground
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                  elide: Text.ElideRight
+                }
+
+                Text {
+                  width: parent.width
+                  text: historyCard.modelData.entry.distanceDecades !== null &&
+                        historyCard.modelData.entry.distanceDecades !== undefined
+                    ? qsTr("%1 dec").arg(historyCard.modelData.entry.distanceDecades.toFixed(2))
+                    : ""
+                  color: root.dim
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                  elide: Text.ElideRight
+                }
               }
             }
           }
