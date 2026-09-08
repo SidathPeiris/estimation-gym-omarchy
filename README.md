@@ -83,6 +83,20 @@ rm -rf ~/.local/state/estimation-gym   # optional: also clears your streak/histo
   orders of magnitude off you were, a hint for how to decompose the estimate next
   time, the source of the figure, and your current/best streak.
 
+## Also on your phone
+
+The same puzzle runs as an installable web app:
+**<https://sidathpeiris.github.io/estimation-gym-app/>**
+([source](https://github.com/SidathPeiris/estimation-gym-app))
+
+It vendors this repo's `Model.js` and `content/questions.js` verbatim, so both
+show the same question on the same day and score it the same way. Install it to
+your home screen and it plays offline.
+
+Streaks are kept **independently** on each device. The app stores its history in
+the browser rather than syncing, so this plugin keeps its no-account,
+no-server, no-network guarantee — nothing here ever talks to the app.
+
 ## Develop / test
 
 ```bash
