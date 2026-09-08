@@ -80,6 +80,11 @@ There is no automated test for `Widget.qml` — QML needs a running Omarchy
 shell. If you change it, please run it in a real shell and say in the pull
 request what you checked.
 
+Symlinking your working copy into `~/.config/omarchy/plugins/` saves you
+reinstalling, but the shell does **not** hot-reload an edit — run
+`omarchy restart shell` after each change, and note it refuses to run while the
+session is locked.
+
 `Model.js` is deliberately free of QML imports so all the logic stays testable
 with plain node. Please keep it that way: logic in `Model.js` with tests,
 presentation in `Widget.qml`.

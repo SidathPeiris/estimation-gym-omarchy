@@ -60,13 +60,32 @@ omarchy restart shell
 ```
 
 This clones the repo into `~/.config/omarchy/plugins/sidath.estimation-gym`
-and enables it. For local development, symlink your working copy instead so
-edits take effect on the shell's live-reload:
+and enables it. For local development, symlink your working copy instead so you
+can edit in place:
 
 ```bash
 ln -s "$(pwd)" ~/.config/omarchy/plugins/estimation-gym
 omarchy plugin enable sidath.estimation-gym
 ```
+
+The symlink saves you reinstalling, but it does **not** give you live reload —
+the shell keeps running the code it started with. Restart it to pick up an edit:
+
+```bash
+omarchy restart shell
+```
+
+(That refuses to run while the session is locked, so unlock first.)
+
+## Update
+
+```bash
+omarchy plugin update sidath.estimation-gym
+omarchy restart shell
+```
+
+The restart is the part that matters. Updating only rewrites files on disk; the
+running shell will keep serving the previous version until it reloads.
 
 ## Remove
 
