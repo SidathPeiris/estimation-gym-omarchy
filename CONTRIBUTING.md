@@ -111,6 +111,38 @@ Both are plain node with no dependencies. CI runs them on every pull request.
 implausible magnitude, an out-of-range year, a prompt that isn't a question, a
 hint too short to teach anything, and near-duplicate prompts.
 
+## Running the tests
+
+These moved here out of the README, which is now for people playing the puzzle
+rather than working on it.
+
+```bash
+node Model.test.js          # scoring, streaks, day selection, calibration
+node questions.test.js      # bank schema, magnitudes, duplicate prompts
+omarchy plugin validate .   # manifest schema check
+qmllint -I /usr/share/omarchy/shell Widget.qml
+```
+
+`qmllint` is best-effort: the `qs.*` shell modules are not fully resolvable by
+plain qmllint, so import warnings about `qs.Ui`, `qs.Commons`, `Panel` and
+friends are expected. What matters is that it reports no errors.
+
+## Project layout
+
+```
+manifest.json          # plugin id, kind (bar-widget), entry point
+Widget.qml             # bar chip + popup panel UI
+Model.js               # pure logic: day selection, scoring, streaks, stats, calibration
+Model.test.js
+questions.test.js      # question bank validation
+preview.png            # marketplace listing preview
+content/
+└── questions.js       # the question bank
+```
+
+State lives at `~/.local/state/estimation-gym/state.json`. Delete it to reset a
+streak while testing.
+
 ## Changing the widget
 
 There is no automated test for `Widget.qml` — QML needs a running Omarchy
