@@ -192,6 +192,19 @@ Panel {
           font.pixelSize: Style.font.caption
         }
 
+        // Questions about quantities that drift are pinned to a year, so the
+        // answer stays correct instead of quietly rotting.
+        Text {
+          width: parent.width
+          visible: root.question && root.question.asOf !== undefined
+          text: root.question && root.question.asOf !== undefined
+            ? qsTr("as of %1").arg(root.question.asOf)
+            : ""
+          color: root.dim
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.caption
+        }
+
         Text {
           width: parent.width
           text: root.question ? root.question.prompt : qsTr("No question available")
@@ -458,6 +471,18 @@ Panel {
                 .arg(root.stats.bestStreak)
                 .arg(root.stats.medianDecades !== null ? root.stats.medianDecades.toFixed(2) : "–")
               color: root.dim
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+              wrapMode: Text.WordWrap
+            }
+
+            // Which way you lean, once there are enough days for it to mean
+            // something. Blank until then rather than reporting noise.
+            Text {
+              width: parent.width
+              visible: text !== ""
+              text: Model.calibrationLabel(root.stats) || ""
+              color: root.foreground
               font.family: root.fontFamily
               font.pixelSize: Style.font.caption
               wrapMode: Text.WordWrap
