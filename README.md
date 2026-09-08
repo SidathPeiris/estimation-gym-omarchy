@@ -126,5 +126,4 @@ MIT
 
 ---
 
-*Want to suggest a question or work on the plugin? See
-[CONTRIBUTING.md](CONTRIBUTING.md).*
+*Got a good question for the bank? [Suggest one](https://github.com/SidathPeiris/estimation-gym-omarchy/issues/new?template=suggest-a-question.yml).*
