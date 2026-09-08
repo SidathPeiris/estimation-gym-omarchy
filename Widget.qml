@@ -82,7 +82,7 @@ Panel {
       return
     }
     guessError = ""
-    stateData = Model.recordAnswer(stateData, today, guess, question.answerValue, hintShown)
+    stateData = Model.recordAnswer(stateData, today, guess, question.answerValue, hintShown, question.id)
     saveState()
   }
 
