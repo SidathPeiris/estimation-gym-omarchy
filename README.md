@@ -42,9 +42,9 @@ Your best streak is kept alongside the current one.
 - The puzzle number is derived from the calendar date (day 0 = 2024-01-01 UTC),
   the same trick Wordle uses — so everyone on a given day gets the same question
   with no server involved.
-- Questions are drawn from the bundled bank of **240** using a deterministic
+- Questions are drawn from the bundled bank of **500** using a deterministic
   seeded shuffle. The whole bank is cycled through before anything repeats, and
-  each pass reshuffles — so it's roughly eight months before you see a repeat.
+  each pass reshuffles — so it's nearly a year and a half before you see a repeat.
 - Questions whose answer changes over time carry a year, shown as "as of 2025"
   above the prompt, so answers don't silently go stale. That also makes the same
   quantity at different dates a genuinely different puzzle — world population in

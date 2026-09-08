@@ -42,9 +42,10 @@ for (const q of QUESTIONS) {
   } else if (q.answerValue <= 0) {
     // Scoring is log based, so a non-positive answer can never be scored.
     fail(id, "answerValue must be positive")
-  } else if (q.answerValue < 1e-9 || q.answerValue > 1e100) {
-    // Loose enough for real cosmology (atoms in the observable universe is
-    // ~10^80) while still catching a stray exponent.
+  } else if (q.answerValue < 1e-40 || q.answerValue > 1e100) {
+    // Loose enough for real physics at both ends - one fission event is
+    // 3.2e-11 joules, and the observable universe holds ~10^80 atoms - while
+    // still catching a stray exponent.
     fail(id, `answerValue ${q.answerValue} is outside the plausible range`)
   }
 
