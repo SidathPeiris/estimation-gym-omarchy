@@ -179,7 +179,7 @@ Panel {
         PanelHero {
           width: parent.width
           title: qsTr("Estimation Gym")
-          meta: qsTr("Puzzle #%1").arg(root.today)
+          meta: Model.formatDay(root.today)
           foreground: root.foreground
           fontFamily: root.fontFamily
         }
