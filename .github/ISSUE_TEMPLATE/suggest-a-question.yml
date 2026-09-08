@@ -1,0 +1,72 @@
+name: Suggest a question
+description: Propose a Fermi estimation question without needing to open a pull request
+title: "[Question]: "
+labels: ["question-suggestion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        You do not need to know git to help. Fill this in and someone will turn
+        it into a pull request. A good question can be *reasoned* to within an
+        order of magnitude, rather than only recalled.
+
+  - type: input
+    id: prompt
+    attributes:
+      label: The question
+      description: Phrase it as a question. Do not put a year in the text - use the year field below.
+      placeholder: How many pianos are there in Japan?
+    validations:
+      required: true
+
+  - type: input
+    id: unit
+    attributes:
+      label: Unit
+      description: What is being counted, as it should read after the number.
+      placeholder: pianos
+    validations:
+      required: true
+
+  - type: input
+    id: answer
+    attributes:
+      label: The answer
+      description: A single number. Being right to within a factor of a few is fine - being wrong by 10x is not, since it would mark a correct guess as wrong.
+      placeholder: "2000000"
+    validations:
+      required: true
+
+  - type: input
+    id: as-of
+    attributes:
+      label: Year (only if the answer changes over time)
+      description: Populations, prices and device counts need a year. Physical constants and fixed quantities do not - leave this blank for those.
+      placeholder: "2025"
+
+  - type: textarea
+    id: hint
+    attributes:
+      label: How would someone work it out?
+      description: The decomposition, not the answer. This is shown after answering and is the part that actually teaches estimation.
+      placeholder: Japan's population is about 125 million, roughly one household in twenty owns a piano, and a household averages about 2.3 people.
+    validations:
+      required: true
+
+  - type: input
+    id: source
+    attributes:
+      label: Where does the number come from?
+      description: A published figure, a survey, or an honest description of the estimate. "Order-of-magnitude estimate from X" is a perfectly good answer.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: acknowledgement
+    attributes:
+      label: Check before submitting
+      options:
+        - label: I believe the answer is right to within an order of magnitude
+          required: true
+        - label: The question can be reasoned about, not just recalled
+          required: true
