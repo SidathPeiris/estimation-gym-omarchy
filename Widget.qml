@@ -32,6 +32,15 @@ Panel {
   property bool hintShown: false
   readonly property var strategy: question ? Model.strategyFor(question) : null
   property bool statsExpanded: false
+  // Open until the first day is played, where "how to play" is the whole
+  // question, then collapsed so it stays clear of the daily puzzle.
+  property bool howToExpanded: !hasAnyHistory
+  readonly property bool hasAnyHistory: {
+    var h = stateData && stateData.history
+    if (!h) return false
+    for (var k in h) return true
+    return false
+  }
   property var stateData: Model.emptyState()
   readonly property var stats: Model.computeStats(stateData)
   readonly property string statePath: Quickshell.env("HOME") + "/.local/state/estimation-gym/state.json"
@@ -164,7 +173,7 @@ Panel {
     open: root.opened
     focusTarget: keyCatcher
     contentWidth: panel.fittedContentWidth(Style.space(360))
-    contentHeight: panel.fittedContentHeight(content.implicitHeight, Style.space(620))
+    contentHeight: panel.fittedContentHeight(content.implicitHeight, Style.space(700))
 
     PanelKeyCatcher {
       id: keyCatcher
@@ -442,6 +451,131 @@ Panel {
             font.pixelSize: Style.font.caption
             font.italic: true
             wrapMode: Text.WordWrap
+          }
+        }
+
+        // --- How to play ---
+        // Content comes from Model.HOW_TO_PLAY and Model.scoringRows() so this
+        // and the phone app teach the same rules in the same words, and the
+        // points quoted cannot drift from what scoring actually awards.
+        Column {
+          width: parent.width
+          spacing: Style.space(8)
+
+          Rectangle {
+            width: parent.width
+            height: 1
+            color: root.dim
+            opacity: 0.3
+          }
+
+          Item {
+            width: parent.width
+            implicitHeight: howToToggle.implicitHeight
+
+            Text {
+              id: howToToggle
+              anchors.left: parent.left
+              text: (root.howToExpanded ? "▾ " : "▸ ") + qsTr("How to play")
+              color: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.bodySmall
+              font.bold: true
+            }
+
+            MouseArea {
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: root.howToExpanded = !root.howToExpanded
+            }
+          }
+
+          Column {
+            width: parent.width
+            spacing: Style.space(6)
+            visible: root.howToExpanded
+
+            Repeater {
+              model: Model.HOW_TO_PLAY.steps
+
+              Text {
+                required property int index
+                required property string modelData
+                width: parent.width
+                text: (index + 1) + ". " + modelData
+                color: root.dim
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.caption
+                wrapMode: Text.WordWrap
+              }
+            }
+
+            Text {
+              width: parent.width
+              text: Model.HOW_TO_PLAY.scoringIntro
+              color: root.dim
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+              wrapMode: Text.WordWrap
+            }
+
+            Repeater {
+              model: Model.scoringRows()
+
+              Item {
+                required property var modelData
+                width: parent.width
+                implicitHeight: scoreBand.implicitHeight
+
+                Text {
+                  id: scoreBand
+                  anchors.left: parent.left
+                  text: modelData.band
+                  color: root.bandColor(modelData.band)
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                  font.bold: true
+                }
+
+                Text {
+                  anchors.left: scoreBand.right
+                  anchors.leftMargin: Style.space(8)
+                  anchors.baseline: scoreBand.baseline
+                  text: modelData.meaning
+                  color: root.dim
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                }
+
+                Text {
+                  anchors.right: parent.right
+                  anchors.baseline: scoreBand.baseline
+                  text: qsTr("%1 pts").arg(modelData.points)
+                  color: root.dim
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                }
+              }
+            }
+
+            Repeater {
+              model: [
+                Model.HOW_TO_PLAY.streakNote,
+                Model.HOW_TO_PLAY.hintNote,
+                Model.HOW_TO_PLAY.statsNote
+              ]
+
+              Text {
+                required property string modelData
+                width: parent.width
+                text: modelData
+                color: root.dim
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.caption
+                wrapMode: Text.WordWrap
+              }
+            }
           }
         }
 
