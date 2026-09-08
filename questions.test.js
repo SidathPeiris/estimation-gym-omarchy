@@ -9,9 +9,13 @@
 
 const assert = require("node:assert/strict")
 const QUESTIONS = require("./content/questions.js")
+const Model = require("./Model.js")
 
-const REQUIRED = ["id", "prompt", "unit", "answerValue", "decompositionHint", "source"]
+const REQUIRED = ["id", "prompt", "unit", "answerValue", "decompositionHint", "strategy", "source"]
 const OPTIONAL = ["asOf"]
+// The strategy selects which hint a player sees, so an invented one would
+// silently fall back to generic advice rather than failing loudly.
+const STRATEGIES = Object.keys(Model.STRATEGIES)
 const CURRENT_YEAR = new Date().getFullYear()
 
 let problems = []
@@ -68,6 +72,9 @@ for (const q of QUESTIONS) {
   }
   if (typeof q.decompositionHint === "string" && q.decompositionHint.trim().length < 30) {
     fail(id, "decompositionHint is too short to teach anything")
+  }
+  if (typeof q.strategy === "string" && !STRATEGIES.includes(q.strategy)) {
+    fail(id, `unknown strategy "${q.strategy}" - expected one of: ${STRATEGIES.join(", ")}`)
   }
 }
 

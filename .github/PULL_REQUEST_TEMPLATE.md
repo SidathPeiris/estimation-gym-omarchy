@@ -14,6 +14,8 @@ schema, magnitudes and duplicate prompts, and CI will run it anyway.
       where it comes from in `source`
 - [ ] `decompositionHint` explains **how to work it out**, not just what the
       answer is
+- [ ] `strategy` names the closest reasoning archetype (see CONTRIBUTING.md);
+      `decompose` is the fine default when nothing else fits
 - [ ] `asOf` is set for anything that drifts over time (populations, prices,
       device counts) and omitted for fixed quantities
 - [ ] The question is answerable by reasoning, not only by having memorised it

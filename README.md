@@ -102,10 +102,16 @@ rm -rf ~/.local/state/estimation-gym   # optional: also clears your streak/histo
   band you scored and your current streak (e.g. 🎯 **Bullseye · x7**).
 - Click the chip to open today's puzzle. Type a numeric guess and press Enter
   (or click "Go"). Scientific notation like `3e12` works for big numbers.
+- Stuck? **Hint** reveals how to approach that *shape* of problem — "stock
+  equals flow times lifetime", "people times per-person rate" — without saying
+  anything about the answer. It halves the day's points and leaves the day out
+  of your calibration, but deliberately does **not** break your streak: the
+  streak measures showing up, and charging someone for wanting to learn the
+  method would be the wrong incentive.
 - After answering, the panel shows your guess against the actual value, how many
-  orders of magnitude off you were, the points earned, a hint for how to
-  decompose the estimate next time, the source of the figure, and your
-  current/best streak.
+  orders of magnitude off you were, the points earned, which archetype the
+  question was, a hint for how to decompose the estimate next time, the source
+  of the figure, and your current/best streak.
 - Expand **Stats** for lifetime totals: band distribution, days played, best
   streak, median decades off, and — once you've played ten days — which way you
   lean, e.g. "You tend to guess low, by about 3.8×". Knowing your direction of
@@ -163,9 +169,15 @@ content/
   "unit": "people",
   "answerValue": 5400000000,           // positive; order of magnitude is what matters
   "decompositionHint": "World population ~8.1 billion with ...",
+  "strategy": "population-rate",       // reasoning archetype; drives the Hint button
   "source": "ITU global connectivity statistics"
 }
 ```
+
+Every question also carries a `strategy`, one of fifteen reasoning archetypes,
+ which selects the guidance shown by the Hint button. The archetype guidance
+ lives in `Model.js` and is written once per shape of problem rather than once
+ per question. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full list.
 
 Add `asOf` whenever the answer drifts (populations, prices, device counts) and
 leave it off for fixed quantities — writing "as of 2025" on the number of atoms

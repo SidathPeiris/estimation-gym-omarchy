@@ -20,12 +20,17 @@ Panel {
   readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
 
   readonly property int today: Model.dayIndex(new Date())
+  onTodayChanged: hintShown = false
   readonly property var question: Model.questionForDay(today, QuestionBank.QUESTIONS)
   readonly property bool answeredToday: Model.hasAnsweredDay(stateData, today)
   readonly property var todayResult: answeredToday ? stateData.history[String(today)] : null
 
   property string guessText: ""
   property string guessError: ""
+  // Whether today's hint has been revealed. Reset when the day rolls over so
+  // yesterday's hint cannot quietly halve today's points.
+  property bool hintShown: false
+  readonly property var strategy: question ? Model.strategyFor(question) : null
   property bool statsExpanded: false
   property var stateData: Model.emptyState()
   readonly property var stats: Model.computeStats(stateData)
@@ -62,7 +67,7 @@ Panel {
       return
     }
     guessError = ""
-    stateData = Model.recordAnswer(stateData, today, guess, question.answerValue)
+    stateData = Model.recordAnswer(stateData, today, guess, question.answerValue, hintShown)
     saveState()
   }
 
@@ -159,7 +164,7 @@ Panel {
     open: root.opened
     focusTarget: keyCatcher
     contentWidth: panel.fittedContentWidth(Style.space(360))
-    contentHeight: panel.fittedContentHeight(content.implicitHeight, Style.space(560))
+    contentHeight: panel.fittedContentHeight(content.implicitHeight, Style.space(620))
 
     PanelKeyCatcher {
       id: keyCatcher
@@ -256,6 +261,66 @@ Panel {
             font.family: root.fontFamily
             font.pixelSize: Style.font.caption
           }
+
+          // --- Hint: how to think about this shape of problem ---
+          // Deliberately says nothing about the answer, only about the method,
+          // so a player who takes it still has to do the estimating.
+          Item {
+            width: parent.width
+            visible: !root.hintShown && root.strategy
+            implicitHeight: hintToggle.implicitHeight
+
+            Text {
+              id: hintToggle
+              anchors.left: parent.left
+              text: "▸ " + qsTr("Hint")
+              color: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.bodySmall
+              font.bold: true
+            }
+
+            Text {
+              anchors.right: parent.right
+              anchors.baseline: hintToggle.baseline
+              text: qsTr("scores half points")
+              color: root.dim
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+            }
+
+            MouseArea {
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: root.hintShown = true
+            }
+          }
+
+          Column {
+            width: parent.width
+            spacing: Style.space(4)
+            visible: root.hintShown && root.strategy
+
+            Text {
+              width: parent.width
+              text: root.strategy ? root.strategy.label : ""
+              color: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.bodySmall
+              font.bold: true
+              wrapMode: Text.WordWrap
+            }
+
+            Text {
+              width: parent.width
+              text: root.strategy ? root.strategy.guidance : ""
+              color: root.dim
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+              wrapMode: Text.WordWrap
+            }
+          }
         }
 
         // --- Answered: result breakdown ---
@@ -295,7 +360,9 @@ Panel {
                   anchors.right: parent.right
                   anchors.baseline: bandLabel.baseline
                   text: root.todayResult
-                    ? qsTr("+%1 pts").arg(Model.pointsForBand(root.todayResult.band))
+                    ? (root.todayResult.assisted
+                        ? qsTr("+%1 pts · hint").arg(Model.pointsForBand(root.todayResult.band, true))
+                        : qsTr("+%1 pts").arg(Model.pointsForBand(root.todayResult.band)))
                     : ""
                   color: root.bandColor(root.todayResult ? root.todayResult.band : "Off")
                   font.family: root.fontFamily
@@ -344,6 +411,17 @@ Panel {
                 font.pixelSize: Style.font.caption
               }
             }
+          }
+
+          Text {
+            width: parent.width
+            visible: root.strategy
+            text: root.strategy ? qsTr("Approach: %1").arg(root.strategy.label) : ""
+            color: root.foreground
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+            font.bold: true
+            wrapMode: Text.WordWrap
           }
 
           Text {

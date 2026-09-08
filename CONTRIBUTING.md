@@ -30,6 +30,9 @@ figure, by breaking it into things they roughly know.
 - **A hint that teaches.** `decompositionHint` is shown *after* answering and
   is the part that makes someone better next time. Explain the route to the
   answer, not the answer.
+- **Tagged with a reasoning archetype.** `strategy` says what *shape* of
+  problem it is. Pick the closest one from the table below; if nothing fits,
+  `decompose` is the honest default and never wrong.
 
 ## Format
 
@@ -41,9 +44,43 @@ figure, by breaking it into things they roughly know.
   "unit": "pianos",                      // reads after the number
   "answerValue": 2000000,                // positive number
   "decompositionHint": "Japan's population is about 125 million, roughly one household in twenty owns a piano, and a household averages about 2.3 people.",
+  "strategy": "population-rate",          // see the table below
   "source": "Japanese musical instrument industry surveys"
 }
 ```
+
+### The `strategy` archetype
+
+Every question names the shape of reasoning it wants. This drives the **Hint**
+button: guidance is written once per archetype, in `Model.js`, rather than once
+per question — a dozen texts to keep correct instead of five hundred, and what
+it teaches transfers, because recognising that a problem is population-times-rate
+helps with every such problem rather than only today's.
+
+The guidance never mentions the answer, only the method, so a player who takes
+the hint still has to do the estimating. Taking it halves the points for that
+day and keeps the day out of calibration; it does not touch the streak.
+
+Pick the closest match. `node questions.test.js` rejects anything not in this
+list, so a typo fails loudly rather than silently falling back.
+
+| `strategy` | The move it wants |
+| --- | --- |
+| `decompose` | Split into two or three factors you can each guess, then multiply |
+| `chain-multiply` | A product of several estimated quantities |
+| `rate-time` | A rate sustained over a span of time |
+| `population-rate` | How many people, times how often each does the thing |
+| `divide-total` | Estimate a total, divide by the size of one unit |
+| `area-density` | Area or volume, times how densely it is packed |
+| `volume-packing` | Container volume over item volume |
+| `unit-conversion` | Chained conversion factors, no real-world guess needed |
+| `stock-flow` | Stock equals flow times lifetime |
+| `energy-balance` | Energy per unit, times how many units |
+| `molar` | Mass to moles to molecules via Avogadro's number |
+| `exponential` | Repeated doubling or halving; count the doublings |
+| `combinatorial` | Counting arrangements rather than measuring |
+| `anchor-scale` | Anchor on a known size, then scale by a ratio |
+| `recall-sanity` | A half-remembered figure, magnitude-checked |
 
 ### The `asOf` year
 

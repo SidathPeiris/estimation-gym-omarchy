@@ -53,6 +53,33 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: strategy
+    attributes:
+      label: What shape of problem is it?
+      description: >-
+        This selects the guidance behind the Hint button, which is written once
+        per archetype rather than once per question. Pick the closest match -
+        "Break it into factors" is the honest default and is never wrong.
+      options:
+        - "decompose - split into factors you can each guess, then multiply"
+        - "chain-multiply - a product of several estimated quantities"
+        - "rate-time - a rate sustained over a span of time"
+        - "population-rate - how many people, times how often each does it"
+        - "divide-total - estimate a total, divide by the size of one unit"
+        - "area-density - area or volume, times how densely it is packed"
+        - "volume-packing - container volume over item volume"
+        - "unit-conversion - chained conversion factors, no real-world guess"
+        - "stock-flow - stock equals flow times lifetime"
+        - "energy-balance - energy per unit, times how many units"
+        - "molar - mass to moles to molecules via Avogadro's number"
+        - "exponential - repeated doubling or halving"
+        - "combinatorial - counting arrangements rather than measuring"
+        - "anchor-scale - anchor on a known size, then scale by a ratio"
+        - "recall-sanity - a half-remembered figure, magnitude-checked"
+    validations:
+      required: true
+
   - type: input
     id: source
     attributes:
