@@ -19,7 +19,11 @@ Panel {
   readonly property color urgent: bar ? bar.urgent : Color.urgent
   readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
 
-  readonly property int today: Model.dayIndex(new Date())
+  // Not readonly: a Timer advances this at midnight. The shell can run for
+  // days, and a widget still offering yesterday's puzzle would record an
+  // answer against yesterday. question, answeredToday and todayResult are all
+  // bindings on it, so they follow automatically.
+  property int today: Model.dayIndex(new Date())
   onTodayChanged: hintShown = false
   readonly property var question: Model.questionForDay(today, QuestionBank.QUESTIONS)
   readonly property bool answeredToday: Model.hasAnsweredDay(stateData, today)
@@ -80,6 +84,20 @@ Panel {
     guessError = ""
     stateData = Model.recordAnswer(stateData, today, guess, question.answerValue, hintShown)
     saveState()
+  }
+
+  // A minute's granularity is ample for something that changes once a day,
+  // and the check is a subtraction - cheap enough to leave running always,
+  // since the bar chip shows today's status whether the panel is open or not.
+  Timer {
+    interval: 60000
+    running: true
+    repeat: true
+    triggeredOnStart: true
+    onTriggered: {
+      var now = Model.dayIndex(new Date())
+      if (now !== root.today) root.today = now
+    }
   }
 
   onOpenedChanged: {
@@ -214,7 +232,7 @@ Panel {
           width: parent.width
           visible: root.question && root.question.asOf !== undefined
           text: root.question && root.question.asOf !== undefined
-            ? qsTr("as of %1").arg(root.question.asOf)
+            ? qsTr("as of %1").arg(Model.formatAsOf(root.question.asOf))
             : ""
           color: root.dim
           font.family: root.fontFamily
@@ -863,6 +881,21 @@ Panel {
               wrapMode: Text.WordWrap
             }
           }
+        }
+
+        // --- Build stamp ---
+        // Version and the puzzle currently on screen, the same pair the phone
+        // app shows, so "am I on the build I installed" and "is this today's
+        // question" are both answerable at a glance. Useful here because
+        // picking up an edit needs an explicit shell restart.
+        Text {
+          width: parent.width
+          horizontalAlignment: Text.AlignRight
+          text: "v" + Model.PLUGIN_VERSION + " · " + Model.formatDay(root.today)
+          color: root.dim
+          opacity: 0.75
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.caption
         }
       }
     }
