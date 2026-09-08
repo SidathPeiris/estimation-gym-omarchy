@@ -26,7 +26,9 @@ Panel {
 
   property string guessText: ""
   property string guessError: ""
+  property bool statsExpanded: false
   property var stateData: Model.emptyState()
+  readonly property var stats: Model.computeStats(stateData)
   readonly property string statePath: Quickshell.env("HOME") + "/.local/state/estimation-gym/state.json"
 
   function loadState(raw) {
@@ -157,7 +159,7 @@ Panel {
     open: root.opened
     focusTarget: keyCatcher
     contentWidth: panel.fittedContentWidth(Style.space(360))
-    contentHeight: panel.fittedContentHeight(content.implicitHeight, Style.space(480))
+    contentHeight: panel.fittedContentHeight(content.implicitHeight, Style.space(560))
 
     PanelKeyCatcher {
       id: keyCatcher
@@ -262,12 +264,31 @@ Panel {
               anchors.margins: Style.space(12)
               spacing: Style.space(6)
 
-              Text {
-                text: root.todayResult ? root.todayResult.band : ""
-                color: root.bandColor(root.todayResult ? root.todayResult.band : "Off")
-                font.family: root.fontFamily
-                font.pixelSize: Style.font.heading
-                font.bold: true
+              Item {
+                width: parent.width
+                implicitHeight: bandLabel.implicitHeight
+
+                Text {
+                  id: bandLabel
+                  anchors.left: parent.left
+                  text: root.todayResult ? root.todayResult.band : ""
+                  color: root.bandColor(root.todayResult ? root.todayResult.band : "Off")
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.heading
+                  font.bold: true
+                }
+
+                Text {
+                  anchors.right: parent.right
+                  anchors.baseline: bandLabel.baseline
+                  text: root.todayResult
+                    ? qsTr("+%1 pts").arg(Model.pointsForBand(root.todayResult.band))
+                    : ""
+                  color: root.bandColor(root.todayResult ? root.todayResult.band : "Off")
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.body
+                  font.bold: true
+                }
               }
 
               Text {
@@ -322,6 +343,125 @@ Panel {
             font.pixelSize: Style.font.caption
             font.italic: true
             wrapMode: Text.WordWrap
+          }
+        }
+
+        // --- Lifetime stats, collapsed by default so the daily flow stays short ---
+        Column {
+          width: parent.width
+          spacing: Style.space(8)
+          visible: root.stats.played > 0
+
+          Rectangle {
+            width: parent.width
+            height: 1
+            color: root.dim
+            opacity: 0.3
+          }
+
+          Item {
+            width: parent.width
+            implicitHeight: statsToggle.implicitHeight
+
+            Text {
+              id: statsToggle
+              anchors.left: parent.left
+              text: (root.statsExpanded ? "▾ " : "▸ ") + qsTr("Stats")
+              color: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.bodySmall
+              font.bold: true
+            }
+
+            Text {
+              anchors.right: parent.right
+              anchors.baseline: statsToggle.baseline
+              text: qsTr("%1 played · %2 pts")
+                .arg(root.stats.played)
+                .arg(Model.formatCompact(root.stats.totalPoints))
+              color: root.dim
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+            }
+
+            MouseArea {
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: root.statsExpanded = !root.statsExpanded
+            }
+          }
+
+          Column {
+            id: statsBody
+            width: parent.width
+            spacing: Style.space(5)
+            visible: root.statsExpanded
+
+            Repeater {
+              model: Model.BANDS
+
+              Item {
+                id: bandRow
+
+                readonly property string band: modelData
+                readonly property int tally: root.stats.counts[band] || 0
+
+                width: statsBody.width
+                implicitHeight: Style.space(14)
+
+                Text {
+                  id: bandName
+                  anchors.left: parent.left
+                  anchors.verticalCenter: parent.verticalCenter
+                  width: Style.space(58)
+                  text: bandRow.band
+                  color: root.dim
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                }
+
+                Text {
+                  id: bandTally
+                  anchors.right: parent.right
+                  anchors.verticalCenter: parent.verticalCenter
+                  text: bandRow.tally
+                  color: root.dim
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                }
+
+                Rectangle {
+                  anchors.left: bandName.right
+                  anchors.right: bandTally.left
+                  anchors.rightMargin: Style.space(8)
+                  anchors.verticalCenter: parent.verticalCenter
+                  height: Style.space(6)
+                  radius: height / 2
+                  color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.14)
+
+                  Rectangle {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: parent.width * (root.stats.played > 0 ? bandRow.tally / root.stats.played : 0)
+                    radius: parent.radius
+                    color: root.bandColor(bandRow.band)
+                  }
+                }
+              }
+            }
+
+            Text {
+              width: parent.width
+              text: qsTr("Best streak %1 · median %2 decades off")
+                .arg(root.stats.bestStreak)
+                .arg(root.stats.medianDecades !== null ? root.stats.medianDecades.toFixed(2) : "–")
+              color: root.dim
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.caption
+              wrapMode: Text.WordWrap
+            }
           }
         }
       }

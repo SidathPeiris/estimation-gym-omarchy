@@ -69,6 +69,43 @@ assert.deepEqual(Object.keys(fresh).sort(), ["bestStreak", "history", "lastCompl
 assert.equal(fresh.streak, 0)
 assert.equal(fresh.bestStreak, 0)
 
+// --- points ---
+assert.equal(Model.pointsForBand("Bullseye"), 100)
+assert.equal(Model.pointsForBand("Close"), 70)
+assert.equal(Model.pointsForBand("Ballpark"), 40)
+assert.equal(Model.pointsForBand("Off"), 10)
+assert.equal(Model.pointsForBand("nonsense"), 0, "unknown band scores nothing rather than NaN")
+assert.equal(Model.scoreGuess(100, 100).points, 100)
+assert.equal(Model.scoreGuess(1e9, 1).points, 10)
+
+// --- computeStats ---
+const emptyStats = Model.computeStats(Model.emptyState())
+assert.equal(emptyStats.played, 0)
+assert.equal(emptyStats.totalPoints, 0)
+assert.equal(emptyStats.medianDecades, null, "no games played means no median to report")
+assert.deepEqual(emptyStats.counts, { Bullseye: 0, Close: 0, Ballpark: 0, Off: 0 })
+
+let statState = Model.emptyState()
+statState = Model.recordAnswer(statState, 1, 100, 100) // Bullseye, 0 decades
+statState = Model.recordAnswer(statState, 2, 1000, 100) // Close, 1 decade
+statState = Model.recordAnswer(statState, 3, 1e6, 100) // Off, 4 decades
+const stats = Model.computeStats(statState)
+assert.equal(stats.played, 3)
+assert.equal(stats.counts.Bullseye, 1)
+assert.equal(stats.counts.Close, 1)
+assert.equal(stats.counts.Off, 1)
+assert.equal(stats.totalPoints, 100 + 70 + 10)
+assert.equal(stats.medianDecades, 1, "median of 0, 1 and 4 decades is 1")
+assert.equal(stats.bestStreak, statState.bestStreak)
+
+// Stats must survive a hand-edited or partially corrupted state file.
+const corrupted = { history: { "1": null, "2": { band: "Bogus" }, "3": { band: "Close" } }, streak: 1, bestStreak: 4 }
+const corruptedStats = Model.computeStats(corrupted)
+assert.equal(corruptedStats.played, 1, "entries with unknown or missing bands are skipped")
+assert.equal(corruptedStats.totalPoints, 70)
+assert.equal(corruptedStats.bestStreak, 4)
+assert.equal(Model.computeStats({}).played, 0, "a state with no history field does not throw")
+
 // --- formatCompact ---
 assert.equal(Model.formatCompact(100), "100")
 assert.equal(Model.formatCompact(1234), "1,234")

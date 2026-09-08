@@ -73,6 +73,10 @@ function bandForDistance(distanceDecades) {
 
 var BAND_POINTS = { Bullseye: 100, Close: 70, Ballpark: 40, Off: 10 }
 
+function pointsForBand(band) {
+  return BAND_POINTS[band] || 0
+}
+
 function scoreGuess(guess, answerValue) {
   var distanceDecades = log10Distance(guess, answerValue)
   var band = bandForDistance(distanceDecades)
@@ -119,6 +123,46 @@ function hasAnsweredDay(state, dayIdx) {
   return !!(state.history && state.history[String(dayIdx)])
 }
 
+function medianOf(values) {
+  if (!values.length) return null
+  var sorted = values.slice().sort(function(a, b) { return a - b })
+  var mid = Math.floor(sorted.length / 2)
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
+}
+
+// Points are derived from the stored band rather than read back from history,
+// so state files written before scoring was surfaced still total up correctly
+// and no migration is needed.
+function computeStats(state) {
+  var history = (state && state.history) || {}
+  var counts = {}
+  for (var b = 0; b < BANDS.length; b++) counts[BANDS[b]] = 0
+
+  var played = 0
+  var totalPoints = 0
+  var distances = []
+
+  for (var key in history) {
+    var entry = history[key]
+    if (!entry || BANDS.indexOf(entry.band) < 0) continue
+    played++
+    counts[entry.band]++
+    totalPoints += pointsForBand(entry.band)
+    if (typeof entry.distanceDecades === "number" && isFinite(entry.distanceDecades)) {
+      distances.push(entry.distanceDecades)
+    }
+  }
+
+  return {
+    played: played,
+    counts: counts,
+    totalPoints: totalPoints,
+    medianDecades: medianOf(distances),
+    streak: (state && state.streak) || 0,
+    bestStreak: (state && state.bestStreak) || 0
+  }
+}
+
 // Compact display like "1.2 × 10^18" for large/small numbers, plain for
 // everyday-sized ones - QML's JS engine doesn't reliably support
 // toLocaleString grouping, so this is hand-rolled rather than relied on.
@@ -146,10 +190,13 @@ if (typeof module !== "undefined") {
     log10Distance: log10Distance,
     bandForDistance: bandForDistance,
     scoreGuess: scoreGuess,
+    pointsForBand: pointsForBand,
     emptyState: emptyState,
     recordAnswer: recordAnswer,
     hasAnsweredDay: hasAnsweredDay,
+    computeStats: computeStats,
     formatCompact: formatCompact,
-    BANDS: BANDS
+    BANDS: BANDS,
+    BAND_POINTS: BAND_POINTS
   }
 }
