@@ -315,10 +315,18 @@ Panel {
                 wrapMode: Text.WordWrap
               }
 
+              // Read back from the stored result rather than from today's
+              // question: growing the bank reshuffles which question falls on
+              // which day, so an answer recorded earlier must still be shown
+              // against the value it was actually scored against.
               Text {
                 width: parent.width
-                text: root.question
-                  ? qsTr("Actual: %1 %2").arg(Model.formatCompact(root.question.answerValue)).arg(root.question.unit)
+                text: root.todayResult && root.question
+                  ? qsTr("Actual: %1 %2")
+                      .arg(Model.formatCompact(root.todayResult.answerValue !== undefined
+                        ? root.todayResult.answerValue
+                        : root.question.answerValue))
+                      .arg(root.question.unit)
                   : ""
                 color: root.foreground
                 font.family: root.fontFamily
