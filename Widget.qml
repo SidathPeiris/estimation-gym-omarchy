@@ -638,7 +638,7 @@ Panel {
             id: historyStrip
             visible: root.historyExpanded
             width: parent.width
-            height: 74
+            height: 96
             orientation: ListView.Horizontal
             spacing: Style.space(6)
             clip: true
@@ -666,7 +666,7 @@ Panel {
               id: historyCard
               required property var modelData
 
-              width: 104
+              width: 118
               height: historyStrip.height
               radius: Style.cornerRadius
               color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.05)
@@ -700,11 +700,19 @@ Panel {
 
                 Text {
                   width: parent.width
-                  text: Model.formatCompact(historyCard.modelData.entry.guess) + " / " +
-                        (historyCard.modelData.entry.answerValue !== undefined
-                          ? Model.formatCompact(historyCard.modelData.entry.answerValue)
-                          : "?")
+                  text: Model.formatCompact(historyCard.modelData.entry.guess)
                   color: root.foreground
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                  elide: Text.ElideRight
+                }
+
+                Text {
+                  width: parent.width
+                  text: "→ " + (historyCard.modelData.entry.answerValue !== undefined
+                    ? Model.formatCompact(historyCard.modelData.entry.answerValue)
+                    : "?")
+                  color: root.dim
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.caption
                   elide: Text.ElideRight
