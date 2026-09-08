@@ -42,13 +42,16 @@ for (const q of QUESTIONS) {
   } else if (q.answerValue <= 0) {
     // Scoring is log based, so a non-positive answer can never be scored.
     fail(id, "answerValue must be positive")
-  } else if (q.answerValue < 1e-9 || q.answerValue > 1e40) {
+  } else if (q.answerValue < 1e-9 || q.answerValue > 1e100) {
+    // Loose enough for real cosmology (atoms in the observable universe is
+    // ~10^80) while still catching a stray exponent.
     fail(id, `answerValue ${q.answerValue} is outside the plausible range`)
   }
 
   if ("asOf" in q) {
     if (!Number.isInteger(q.asOf)) fail(id, "asOf must be a whole year")
-    else if (q.asOf < 1000 || q.asOf > CURRENT_YEAR + 1) fail(id, `asOf ${q.asOf} is out of range`)
+    // Negative years are BCE, so the floor is deep enough for antiquity.
+    else if (q.asOf < -10000 || q.asOf > CURRENT_YEAR + 1) fail(id, `asOf ${q.asOf} is out of range`)
   }
 
   // A prompt that pins itself to a date in prose should carry the structured
