@@ -14,7 +14,7 @@ ships with the plugin and your history lives in a single local file. Nothing
 about your play ever leaves your machine, because nothing here ever connects to
 anything.
 
-![Estimation Gym: the guess panel, the scored result, and the bar chip](preview.png)
+![Estimation Gym: the guess panel with a hint revealed, the scored result with its history strip and stats, and the bar chip](preview.png)
 
 ## Install
 
