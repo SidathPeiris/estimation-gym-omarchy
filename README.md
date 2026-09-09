@@ -122,7 +122,11 @@ Delete that file to start over.
 
 ## License
 
-MIT
+[GNU Affero General Public License v3.0 or later](LICENSE).
+
+Free software: you may use, study, share and modify it. If you distribute a
+modified version, or run one as a network service, the same licence applies -
+your users get the source too.
 
 ---
 

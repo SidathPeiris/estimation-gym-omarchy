@@ -4,7 +4,7 @@
   "name": "Estimation Gym",
   "version": "0.4.0",
   "author": "sidath",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "description": "Daily Fermi-estimation puzzle: guess real-world quantities, scored on order-of-magnitude closeness.",
   "kinds": ["bar-widget"],
   "entryPoints": {
