@@ -159,6 +159,28 @@ content/
 State lives at `~/.local/state/estimation-gym/state.json`. Delete it to reset a
 streak while testing.
 
+## Versioning
+
+`major.minor.patch`, declared in `manifest.json`:
+
+| Field | Bumped when |
+| --- | --- |
+| **major** | A full release - the plugin is meaningfully a new thing |
+| **minor** | A feature is added within that release |
+| **patch** | A fix or a small change within that feature set |
+
+No padding. `01.02.03` reads tidily but is not a valid version: leading zeros
+are forbidden, every field would cap at 99, and anything that parses versions
+either rejects it or sorts it wrongly.
+
+`Model.js` mirrors the manifest in `PLUGIN_VERSION`, because the widget shows
+it at the foot of the panel and a version display is only worth having if it
+is trustworthy. `Model.test.js` asserts the two match and that the format is
+valid, so neither can drift.
+
+Adding questions is a **minor** bump: they are appended, so they extend the
+schedule rather than changing it.
+
 ## Changing the widget
 
 There is no automated test for `Widget.qml` — QML needs a running Omarchy
