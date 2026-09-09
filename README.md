@@ -74,8 +74,8 @@ incentive.
 
 - The question is picked from the calendar date, the same trick Wordle uses, so
   everyone gets the same one on a given day with no server involved.
-- There are **500 questions**, drawn in a shuffled order that cycles through the
-  whole bank before anything repeats — nearly a year and a half before you see
+- There are **1,000 questions**, drawn in a shuffled order that cycles through the
+  whole bank before anything repeats — nearly three years before you see
   one twice.
 - Questions whose answer drifts carry a year, shown as *"as of 2025"* above the
   prompt, so answers do not silently go stale. That also makes the same quantity
