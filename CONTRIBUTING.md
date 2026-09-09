@@ -49,6 +49,22 @@ figure, by breaking it into things they roughly know.
 }
 ```
 
+### Add to the end, never the middle
+
+**New questions go at the bottom of the file.** Do not insert, reorder or
+delete existing entries.
+
+The bank's array order *is* the calendar: the question for a given day is read
+straight off the array. Appending is therefore free — it extends the schedule
+by one more day at the far end and moves nothing. Inserting a question in the
+middle would shift every question after it onto a different date, including
+days people have already played.
+
+`questions.test.js` pins the order of the questions already scheduled, so an
+accidental reorder fails the tests rather than quietly rewriting everyone's
+calendar. Correcting a value, a typo or a source on an existing question is
+fine and does not trip it — only moving entries does.
+
 ### The `strategy` archetype
 
 Every question names the shape of reasoning it wants. This drives the **Hint**
