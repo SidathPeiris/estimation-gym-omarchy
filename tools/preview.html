@@ -1,0 +1,266 @@
+<!--
+  Source for preview.png, the image the marketplace listing shows.
+
+  It is a mock-up rather than a real screenshot: the widget only renders inside
+  a running Omarchy shell, and a photograph of one screen cannot show the guess
+  panel and the scored result at the same time. Everything in it mirrors what
+  Widget.qml actually draws, and the palette matches the shell's.
+
+  Regenerate after any visible change to the widget, then commit both files:
+
+    chrome --headless --disable-gpu --hide-scrollbars \
+           --window-size=1600,900 \
+           --screenshot=preview.png \
+           tools/preview.html
+
+  Keep it to 1600x900. If content grows past that the scoring legend silently
+  falls off the bottom of the canvas, which has happened once already - check
+  the render, do not assume it fitted.
+-->
+<style>
+  @page { margin: 0 }
+  * { margin: 0; padding: 0; box-sizing: border-box }
+  :root {
+    --bg: #1a1b26;
+    --bar: #16161e;
+    --panel: #1f2335;
+    --line: #2f3550;
+    --fg: #c0caf5;
+    --dim: #565f89;
+    --accent: #7aa2f7;
+    --urgent: #f7768e;
+    --mono: "Cascadia Mono", "CaskaydiaCove Nerd Font", Consolas, "DejaVu Sans Mono", monospace;
+  }
+  html, body { width: 1600px; height: 900px }
+  body {
+    background:
+      radial-gradient(1200px 700px at 22% -8%, #232741 0%, rgba(35,39,65,0) 62%),
+      radial-gradient(900px 600px at 88% 106%, #1e2333 0%, rgba(30,35,51,0) 60%),
+      var(--bg);
+    font-family: var(--mono);
+    color: var(--fg);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- top bar ---------- */
+  .bar {
+    height: 44px; background: var(--bar); border-bottom: 1px solid #2a2e45;
+    display: flex; align-items: center; padding: 0 20px; gap: 22px; font-size: 15px;
+  }
+  .bar .ws { display: flex; gap: 10px; align-items: center; color: var(--dim) }
+  .bar .ws b { color: var(--accent) }
+  .bar .spacer { flex: 1 }
+  .bar .item { color: var(--dim) }
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 12px; border-radius: 7px;
+    background: rgba(122,162,247,.13); outline: 1px solid rgba(122,162,247,.42);
+    font-weight: 700; letter-spacing: .2px;
+  }
+  .chip .emoji { font-family: "Segoe UI Emoji"; font-size: 15px }
+  .chip.plain { background: rgba(192,202,245,.07); outline-color: rgba(192,202,245,.26); color: var(--fg) }
+
+  /* ---------- layout ---------- */
+  .stage { display: flex; gap: 44px; padding: 24px 60px 0; align-items: flex-start }
+  .col { flex: 1; min-width: 0 }
+  .step {
+    font-size: 13px; letter-spacing: 2.4px; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 13px; padding-left: 2px;
+  }
+  .step b { color: var(--accent); font-weight: 700 }
+
+  /* ---------- panel ---------- */
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 22px 20px; box-shadow: 0 24px 60px rgba(0,0,0,.46);
+  }
+  .hero { display: flex; align-items: baseline; justify-content: space-between; gap: 16px }
+  .hero h1 { font-size: 26px; font-weight: 700; letter-spacing: .3px }
+  .hero .meta { font-size: 14px; color: var(--dim); letter-spacing: 1.2px; text-transform: uppercase }
+  .streak { font-size: 14px; color: var(--dim); margin-top: 9px; letter-spacing: .3px }
+  .prompt { font-size: 19px; line-height: 1.5; margin-top: 14px }
+
+  /* ---------- input ---------- */
+  .row { display: flex; gap: 12px; margin-top: 16px }
+  .field {
+    flex: 1; background: #171a2b; border: 1px solid #333a58; border-radius: 9px;
+    padding: 13px 16px; font-size: 17px; color: var(--dim); display: flex; align-items: center;
+  }
+  .field .caret { display: inline-block; width: 2px; height: 21px; background: var(--accent); margin-right: 9px }
+  .go {
+    padding: 13px 24px; border-radius: 9px; background: rgba(122,162,247,.16);
+    border: 1px solid rgba(122,162,247,.5); color: var(--accent); font-size: 17px; font-weight: 700;
+  }
+
+  /* ---------- result ---------- */
+  .result {
+    margin-top: 14px; border-radius: 11px; padding: 14px 16px;
+    background: rgba(122,162,247,.10); border: 1px solid rgba(122,162,247,.46);
+  }
+  .result-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px }
+  .band { font-size: 28px; font-weight: 700; color: var(--accent); letter-spacing: .4px }
+  .points { font-size: 17px; font-weight: 700; color: var(--accent) }
+  .line { font-size: 15px; margin-top: 9px; letter-spacing: .2px }
+  .decades { font-size: 13px; color: var(--dim); margin-top: 10px }
+  .hint { font-size: 13px; line-height: 1.6; color: var(--dim); margin-top: 16px }
+
+  /* ---------- stats ---------- */
+  .stats { margin-top: 13px; border-top: 1px solid #262b42; padding-top: 11px }
+  .stats-head { display: flex; align-items: baseline; justify-content: space-between; font-size: 14px }
+  .stats-head b { font-weight: 700 }
+  .stats-head span { color: var(--dim); font-size: 13px }
+  .bar-row { display: grid; grid-template-columns: 5rem 1fr 1.6rem; align-items: center; gap: 10px; margin-top: 7px }
+  .bar-label { font-size: 13px; color: var(--dim) }
+  /* Both must be block: width and height do not apply to inline spans. */
+  .bar-track { display: block; height: 7px; border-radius: 4px; background: rgba(192,202,245,.14); overflow: hidden }
+  .bar-fill { display: block; height: 100%; border-radius: 4px }
+  .bar-tally { font-size: 13px; color: var(--dim); text-align: right }
+  .stats-foot { font-size: 13px; color: var(--dim); margin-top: 12px }
+  .calib {
+    font-size: 13px; color: var(--fg); margin-top: 9px; padding: 9px 12px;
+    border-left: 2px solid var(--accent); background: rgba(122,162,247,.08); border-radius: 0 6px 6px 0;
+  }
+
+  /* ---------- chips + legend ---------- */
+  .chips { margin-top: 16px; padding: 14px 18px; background: rgba(31,35,53,.55); border: 1px solid #2a3049; border-radius: 12px }
+  .chips .t { font-size: 12px; letter-spacing: 2.4px; text-transform: uppercase; color: var(--dim); margin-bottom: 14px }
+  .chips .r { display: flex; align-items: center; gap: 16px; margin-top: 11px }
+  .chips .r:first-of-type { margin-top: 0 }
+  .chips .note { font-size: 13px; color: var(--dim) }
+
+  .legend {
+    margin: 16px 60px 0; padding-top: 12px; border-top: 1px solid #262b42;
+    display: flex; align-items: center; gap: 30px; font-size: 13px; color: var(--dim);
+  }
+  .legend .lbl { letter-spacing: 2.4px; text-transform: uppercase; font-size: 12px }
+  .legend .b { display: flex; align-items: center; gap: 8px }
+  .dot { width: 9px; height: 9px; border-radius: 50% }
+  .legend b { color: var(--fg); font-weight: 700 }
+
+  /* ---------- disclosures (Hint / How to play / History / Stats) ---------- */
+  .disc { display: flex; align-items: baseline; justify-content: space-between; margin-top: 11px }
+  .disc .l { font-size: 14px; font-weight: 700 }
+  .disc .r { font-size: 13px; color: var(--dim) }
+
+  /* ---------- revealed hint ---------- */
+  .hintbox {
+    margin-top: 10px; padding: 11px 14px; border-left: 2px solid var(--accent);
+    background: rgba(122,162,247,.08); border-radius: 0 7px 7px 0;
+  }
+  .hintbox .lab { font-size: 14px; font-weight: 700 }
+  .hintbox .txt { font-size: 13px; line-height: 1.6; color: var(--dim); margin-top: 5px }
+
+  /* ---------- approach line on the result ---------- */
+  .approach { font-size: 13px; font-weight: 700; margin-top: 16px }
+
+  /* ---------- history strip ---------- */
+  .strip { display: flex; gap: 8px; margin-top: 10px; overflow: hidden }
+  .card {
+    width: 118px; flex: 0 0 118px; border-radius: 8px; padding: 9px 10px;
+    background: rgba(192,202,245,.05); border: 1px solid rgba(86,95,137,.35);
+  }
+  .card .d { font-size: 12px; color: var(--dim) }
+  .card .b { font-size: 12px; font-weight: 700; margin-top: 3px }
+  .card .g { font-size: 12px; margin-top: 3px }
+  .card .a { font-size: 12px; color: var(--dim) }
+  .card .x { font-size: 12px; color: var(--dim); margin-top: 3px }
+
+  /* ---------- build stamp ---------- */
+  .stamp { text-align: right; font-size: 12px; color: var(--dim); opacity: .75; margin-top: 11px }
+</style>
+
+<div class="bar">
+  <div class="ws"><b>1</b><span>2</span><span>3</span></div>
+  <span class="item">estimation-gym-omarchy</span>
+  <div class="spacer"></div>
+  <span class="chip"><span class="emoji">&#127919;</span>Bullseye &middot; x3</span>
+  <span class="item">62%</span>
+  <span class="item">Sat 1 Jan&nbsp; 09:41</span>
+</div>
+
+<div class="stage">
+  <div class="col">
+    <div class="step"><b>01</b> &nbsp;Estimate &mdash; with a hint if you want one</div>
+    <div class="panel">
+      <div class="hero"><h1>Estimation Gym</h1><span class="meta">Sat 1 Jan</span></div>
+      <div class="streak">Streak 2 &middot; Best 10</div>
+      <div class="prompt">How many professional piano tuners work in the Chicago metro area?</div>
+      <div class="row">
+        <div class="field"><span class="caret"></span>Guess (piano tuners)</div>
+        <div class="go">Go</div>
+      </div>
+
+      <div class="disc"><span class="l">&#9662; Hint</span><span class="r">scores half points</span></div>
+      <div class="hintbox">
+        <div class="lab">People times per-person rate</div>
+        <div class="txt">Start from how many people are involved, then how often each one
+          does the thing. The population is usually the easy half; the per-person rate is
+          where the uncertainty really sits, so spend your thinking there.</div>
+      </div>
+
+      <div class="disc"><span class="l">&#9656; How to play</span><span class="r"></span></div>
+      <div class="disc"><span class="l">&#9656; History</span><span class="r">14 days</span></div>
+      <div class="disc"><span class="l">&#9656; Stats</span><span class="r">14 played &middot; 980 pts</span></div>
+      <div class="stamp">v0.1.0 &middot; Sat 1 Jan</div>
+    </div>
+
+    <div class="chips">
+      <div class="t">In the bar</div>
+      <div class="r">
+        <span class="chip plain"><span class="emoji">&#127919;</span>Guess</span>
+        <span class="note">before you answer</span>
+      </div>
+      <div class="r">
+        <span class="chip"><span class="emoji">&#127919;</span>Bullseye &middot; x3</span>
+        <span class="note">after &mdash; band + current streak</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="step"><b>02</b> &nbsp;Score, learn, look back</div>
+    <div class="panel">
+      <div class="hero"><h1>Estimation Gym</h1><span class="meta">Sat 1 Jan</span></div>
+      <div class="streak">Streak 3 &middot; Best 10</div>
+      <div class="prompt">How many professional piano tuners work in the Chicago metro area?</div>
+
+      <div class="result">
+        <div class="result-head"><span class="band">Bullseye</span><span class="points">+100 pts</span></div>
+        <div class="line">Your guess: 60 piano tuners</div>
+        <div class="line">Actual: 100 piano tuners</div>
+        <div class="decades">Off by 0.22 orders of magnitude</div>
+      </div>
+
+      <div class="approach">Approach: People times per-person rate</div>
+      <div class="hint">How to think about it: Metro population (~9.5M) &rarr; households with a piano (~1 in 20) &rarr; pianos tuned about once a year &rarr; a full-time tuner manages ~1000 a year.</div>
+
+      <div class="disc"><span class="l">&#9662; History</span><span class="r">14 days</span></div>
+      <div class="strip">
+        <div class="card"><div class="d">Fri 31 Dec</div><div class="b" style="color:#7aa2f7">Close</div><div class="g">2.0 &times; 10^7</div><div class="a">&rarr; 8.0 &times; 10^6</div><div class="x">0.40 dec</div></div>
+        <div class="card"><div class="d">Thu 30 Dec</div><div class="b" style="color:#7aa2f7">Bullseye</div><div class="g">450</div><div class="a">&rarr; 500</div><div class="x">0.05 dec</div></div>
+        <div class="card"><div class="d">Wed 29 Dec</div><div class="b" style="color:#f7768e">Off</div><div class="g">1.0 &times; 10^3</div><div class="a">&rarr; 4.5 &times; 10^6</div><div class="x">3.65 dec</div></div>
+        <div class="card"><div class="d">Tue 28 Dec</div><div class="b" style="color:#7aa2f7">Close</div><div class="g">6.0 &times; 10^9</div><div class="a">&rarr; 8.1 &times; 10^9</div><div class="x">0.13 dec</div></div>
+      </div>
+
+      <div class="stats">
+        <div class="stats-head"><b>&#9662; Stats</b><span>14 played &middot; 980 pts</span></div>
+        <div class="bar-row"><span class="bar-label">Bullseye</span><span class="bar-track"><span class="bar-fill" style="width:14%;background:#7aa2f7"></span></span><span class="bar-tally">2</span></div>
+        <div class="bar-row"><span class="bar-label">Close</span><span class="bar-track"><span class="bar-fill" style="width:79%;background:#7aa2f7;opacity:.72"></span></span><span class="bar-tally">11</span></div>
+        <div class="bar-row"><span class="bar-label">Ballpark</span><span class="bar-track"><span class="bar-fill" style="width:0%;background:#c0caf5"></span></span><span class="bar-tally">0</span></div>
+        <div class="bar-row"><span class="bar-label">Off</span><span class="bar-track"><span class="bar-fill" style="width:7%;background:#f7768e"></span></span><span class="bar-tally">1</span></div>
+        <div class="calib">You tend to guess low, by about 3.3&times;</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <span class="lbl">Scoring</span>
+  <span class="b"><span class="dot" style="background:#7aa2f7"></span><b>Bullseye</b> &le;0.3 decades</span>
+  <span class="b"><span class="dot" style="background:#7aa2f7;opacity:.62"></span><b>Close</b> &le;1</span>
+  <span class="b"><span class="dot" style="background:#c0caf5"></span><b>Ballpark</b> &le;2</span>
+  <span class="b"><span class="dot" style="background:#f7768e"></span><b>Off</b> &gt;2</span>
+  <span style="flex:1"></span>
+  <span>500 questions &middot; one per day &middot; no account, no server, no network</span>
+</div>
