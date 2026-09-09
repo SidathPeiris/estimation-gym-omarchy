@@ -157,12 +157,20 @@ Panel {
       spacing: Style.space(5)
 
       Text {
+
+        // Never rich text: bank content is contributed, and none of this is markup.
+
+        textFormat: Text.PlainText
         text: "\u{1F3AF}" // target emoji: today's estimation target
         font.pixelSize: Style.font.body
         anchors.verticalCenter: parent.verticalCenter
       }
 
       Text {
+
+        // Never rich text: bank content is contributed, and none of this is markup.
+
+        textFormat: Text.PlainText
         text: root.answeredToday
           ? root.todayResult.band + (root.stateData.streak > 0 ? " · x" + root.stateData.streak : "")
           : qsTr("Guess")
@@ -219,6 +227,10 @@ Panel {
         }
 
         Text {
+
+          // Never rich text: bank content is contributed, and none of this is markup.
+
+          textFormat: Text.PlainText
           width: parent.width
           text: qsTr("Streak %1 · Best %2").arg(root.stateData.streak).arg(root.stateData.bestStreak)
           color: root.dim
@@ -229,6 +241,8 @@ Panel {
         // Questions about quantities that drift are pinned to a year, so the
         // answer stays correct instead of quietly rotting.
         Text {
+          // Never rich text: bank content is contributed, and none of this is markup.
+          textFormat: Text.PlainText
           width: parent.width
           visible: root.question && root.question.asOf !== undefined
           text: root.question && root.question.asOf !== undefined
@@ -240,6 +254,10 @@ Panel {
         }
 
         Text {
+
+          // Never rich text: bank content is contributed, and none of this is markup.
+
+          textFormat: Text.PlainText
           width: parent.width
           text: root.question ? root.question.prompt : qsTr("No question available")
           color: root.foreground
@@ -284,6 +302,10 @@ Panel {
           }
 
           Text {
+
+            // Never rich text: bank content is contributed, and none of this is markup.
+
+            textFormat: Text.PlainText
             visible: root.guessError !== ""
             text: root.guessError
             color: root.urgent
@@ -300,6 +322,10 @@ Panel {
             implicitHeight: hintToggle.implicitHeight
 
             Text {
+
+              // Never rich text: bank content is contributed, and none of this is markup.
+
+              textFormat: Text.PlainText
               id: hintToggle
               anchors.left: parent.left
               text: "▸ " + qsTr("Hint")
@@ -310,6 +336,10 @@ Panel {
             }
 
             Text {
+
+              // Never rich text: bank content is contributed, and none of this is markup.
+
+              textFormat: Text.PlainText
               anchors.right: parent.right
               anchors.baseline: hintToggle.baseline
               text: qsTr("scores half points")
@@ -332,6 +362,10 @@ Panel {
             visible: root.hintShown && root.strategy
 
             Text {
+
+              // Never rich text: bank content is contributed, and none of this is markup.
+
+              textFormat: Text.PlainText
               width: parent.width
               text: root.strategy ? root.strategy.label : ""
               color: root.foreground
@@ -342,6 +376,10 @@ Panel {
             }
 
             Text {
+
+              // Never rich text: bank content is contributed, and none of this is markup.
+
+              textFormat: Text.PlainText
               width: parent.width
               text: root.strategy ? root.strategy.guidance : ""
               color: root.dim
@@ -376,6 +414,10 @@ Panel {
                 implicitHeight: bandLabel.implicitHeight
 
                 Text {
+
+                  // Never rich text: bank content is contributed, and none of this is markup.
+
+                  textFormat: Text.PlainText
                   id: bandLabel
                   anchors.left: parent.left
                   text: root.todayResult ? root.todayResult.band : ""
@@ -386,6 +428,10 @@ Panel {
                 }
 
                 Text {
+
+                  // Never rich text: bank content is contributed, and none of this is markup.
+
+                  textFormat: Text.PlainText
                   anchors.right: parent.right
                   anchors.baseline: bandLabel.baseline
                   text: root.todayResult
@@ -401,6 +447,10 @@ Panel {
               }
 
               Text {
+
+                // Never rich text: bank content is contributed, and none of this is markup.
+
+                textFormat: Text.PlainText
                 width: parent.width
                 text: root.todayResult
                   ? qsTr("Your guess: %1 %2").arg(Model.formatCompact(root.todayResult.guess)).arg(root.question.unit)
@@ -416,6 +466,8 @@ Panel {
               // which day, so an answer recorded earlier must still be shown
               // against the value it was actually scored against.
               Text {
+                // Never rich text: bank content is contributed, and none of this is markup.
+                textFormat: Text.PlainText
                 width: parent.width
                 text: root.todayResult && root.question
                   ? qsTr("Actual: %1 %2")
@@ -431,6 +483,10 @@ Panel {
               }
 
               Text {
+
+                // Never rich text: bank content is contributed, and none of this is markup.
+
+                textFormat: Text.PlainText
                 width: parent.width
                 text: root.todayResult
                   ? qsTr("Off by %1 orders of magnitude").arg(root.todayResult.distanceDecades !== null ? root.todayResult.distanceDecades.toFixed(2) : "?")
@@ -443,6 +499,10 @@ Panel {
           }
 
           Text {
+
+            // Never rich text: bank content is contributed, and none of this is markup.
+
+            textFormat: Text.PlainText
             width: parent.width
             visible: root.strategy
             text: root.strategy ? qsTr("Approach: %1").arg(root.strategy.label) : ""
@@ -454,6 +514,10 @@ Panel {
           }
 
           Text {
+
+            // Never rich text: bank content is contributed, and none of this is markup.
+
+            textFormat: Text.PlainText
             width: parent.width
             text: root.question ? qsTr("How to think about it: %1").arg(root.question.decompositionHint) : ""
             color: root.dim
@@ -463,6 +527,10 @@ Panel {
           }
 
           Text {
+
+            // Never rich text: bank content is contributed, and none of this is markup.
+
+            textFormat: Text.PlainText
             width: parent.width
             visible: root.question && root.question.source
             text: root.question ? qsTr("Source: %1").arg(root.question.source) : ""
@@ -494,6 +562,10 @@ Panel {
             implicitHeight: howToToggle.implicitHeight
 
             Text {
+
+              // Never rich text: bank content is contributed, and none of this is markup.
+
+              textFormat: Text.PlainText
               id: howToToggle
               anchors.left: parent.left
               text: (root.howToExpanded ? "▾ " : "▸ ") + qsTr("How to play")
@@ -520,6 +592,10 @@ Panel {
               model: Model.HOW_TO_PLAY.steps
 
               Text {
+
+                // Never rich text: bank content is contributed, and none of this is markup.
+
+                textFormat: Text.PlainText
                 required property int index
                 required property string modelData
                 width: parent.width
@@ -532,6 +608,10 @@ Panel {
             }
 
             Text {
+
+              // Never rich text: bank content is contributed, and none of this is markup.
+
+              textFormat: Text.PlainText
               width: parent.width
               text: Model.HOW_TO_PLAY.scoringIntro
               color: root.dim
@@ -550,6 +630,10 @@ Panel {
                 implicitHeight: scoreBand.implicitHeight
 
                 Text {
+
+                  // Never rich text: bank content is contributed, and none of this is markup.
+
+                  textFormat: Text.PlainText
                   id: scoreBand
                   anchors.left: parent.left
                   text: scoreRow.modelData.band
@@ -560,6 +644,10 @@ Panel {
                 }
 
                 Text {
+
+                  // Never rich text: bank content is contributed, and none of this is markup.
+
+                  textFormat: Text.PlainText
                   anchors.left: scoreBand.right
                   anchors.leftMargin: Style.space(8)
                   anchors.baseline: scoreBand.baseline
@@ -570,6 +658,10 @@ Panel {
                 }
 
                 Text {
+
+                  // Never rich text: bank content is contributed, and none of this is markup.
+
+                  textFormat: Text.PlainText
                   anchors.right: parent.right
                   anchors.baseline: scoreBand.baseline
                   text: qsTr("%1 pts").arg(scoreRow.modelData.points)
@@ -588,6 +680,10 @@ Panel {
               ]
 
               Text {
+
+                // Never rich text: bank content is contributed, and none of this is markup.
+
+                textFormat: Text.PlainText
                 required property string modelData
                 width: parent.width
                 text: modelData
@@ -624,6 +720,10 @@ Panel {
             implicitHeight: historyToggle.implicitHeight
 
             Text {
+
+              // Never rich text: bank content is contributed, and none of this is markup.
+
+              textFormat: Text.PlainText
               id: historyToggle
               anchors.left: parent.left
               text: (root.historyExpanded ? "▾ " : "▸ ") + qsTr("History")
@@ -634,6 +734,10 @@ Panel {
             }
 
             Text {
+
+              // Never rich text: bank content is contributed, and none of this is markup.
+
+              textFormat: Text.PlainText
               anchors.right: parent.right
               anchors.baseline: historyToggle.baseline
               text: root.historyDays.length === 1
@@ -697,6 +801,10 @@ Panel {
                 spacing: Style.space(3)
 
                 Text {
+
+                  // Never rich text: bank content is contributed, and none of this is markup.
+
+                  textFormat: Text.PlainText
                   width: parent.width
                   text: Model.formatDay(historyCard.modelData.day)
                   color: root.dim
@@ -706,6 +814,10 @@ Panel {
                 }
 
                 Text {
+
+                  // Never rich text: bank content is contributed, and none of this is markup.
+
+                  textFormat: Text.PlainText
                   width: parent.width
                   text: historyCard.modelData.entry.band +
                         (historyCard.modelData.entry.assisted ? " ·" : "")
@@ -717,6 +829,10 @@ Panel {
                 }
 
                 Text {
+
+                  // Never rich text: bank content is contributed, and none of this is markup.
+
+                  textFormat: Text.PlainText
                   width: parent.width
                   text: Model.formatCompact(historyCard.modelData.entry.guess)
                   color: root.foreground
@@ -726,6 +842,10 @@ Panel {
                 }
 
                 Text {
+
+                  // Never rich text: bank content is contributed, and none of this is markup.
+
+                  textFormat: Text.PlainText
                   width: parent.width
                   text: "→ " + (historyCard.modelData.entry.answerValue !== undefined
                     ? Model.formatCompact(historyCard.modelData.entry.answerValue)
@@ -737,6 +857,10 @@ Panel {
                 }
 
                 Text {
+
+                  // Never rich text: bank content is contributed, and none of this is markup.
+
+                  textFormat: Text.PlainText
                   width: parent.width
                   text: historyCard.modelData.entry.distanceDecades !== null &&
                         historyCard.modelData.entry.distanceDecades !== undefined
@@ -770,6 +894,10 @@ Panel {
             implicitHeight: statsToggle.implicitHeight
 
             Text {
+
+              // Never rich text: bank content is contributed, and none of this is markup.
+
+              textFormat: Text.PlainText
               id: statsToggle
               anchors.left: parent.left
               text: (root.statsExpanded ? "▾ " : "▸ ") + qsTr("Stats")
@@ -780,6 +908,10 @@ Panel {
             }
 
             Text {
+
+              // Never rich text: bank content is contributed, and none of this is markup.
+
+              textFormat: Text.PlainText
               anchors.right: parent.right
               anchors.baseline: statsToggle.baseline
               text: qsTr("%1 played · %2 pts")
@@ -817,6 +949,10 @@ Panel {
                 implicitHeight: Style.space(14)
 
                 Text {
+
+                  // Never rich text: bank content is contributed, and none of this is markup.
+
+                  textFormat: Text.PlainText
                   id: bandName
                   anchors.left: parent.left
                   anchors.verticalCenter: parent.verticalCenter
@@ -828,6 +964,10 @@ Panel {
                 }
 
                 Text {
+
+                  // Never rich text: bank content is contributed, and none of this is markup.
+
+                  textFormat: Text.PlainText
                   id: bandTally
                   anchors.right: parent.right
                   anchors.verticalCenter: parent.verticalCenter
@@ -859,6 +999,10 @@ Panel {
             }
 
             Text {
+
+              // Never rich text: bank content is contributed, and none of this is markup.
+
+              textFormat: Text.PlainText
               width: parent.width
               text: qsTr("Best streak %1 · median %2 decades off")
                 .arg(root.stats.bestStreak)
@@ -872,6 +1016,8 @@ Panel {
             // Which way you lean, once there are enough days for it to mean
             // something. Blank until then rather than reporting noise.
             Text {
+              // Never rich text: bank content is contributed, and none of this is markup.
+              textFormat: Text.PlainText
               width: parent.width
               visible: text !== ""
               text: Model.calibrationLabel(root.stats) || ""
@@ -889,6 +1035,8 @@ Panel {
         // question" are both answerable at a glance. Useful here because
         // picking up an edit needs an explicit shell restart.
         Text {
+          // Never rich text: bank content is contributed, and none of this is markup.
+          textFormat: Text.PlainText
           width: parent.width
           horizontalAlignment: Text.AlignRight
           text: "v" + Model.PLUGIN_VERSION + " · " + Model.formatDay(root.today)

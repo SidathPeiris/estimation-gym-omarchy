@@ -73,6 +73,15 @@ for (const q of QUESTIONS) {
   if (typeof q.decompositionHint === "string" && q.decompositionHint.trim().length < 30) {
     fail(id, "decompositionHint is too short to teach anything")
   }
+  // Nothing in a question is ever meant to be markup. The widget renders it
+  // as plain text and the app sets it via textContent, but a contributed
+  // question carrying tags is a sign something is wrong either way.
+  for (const field of ["prompt", "decompositionHint", "source", "unit"]) {
+    const value = q[field]
+    if (typeof value === "string" && /[<>]/.test(value)) {
+      fail(id, `${field} contains angle brackets - questions are plain text`)
+    }
+  }
   if (typeof q.strategy === "string" && !STRATEGIES.includes(q.strategy)) {
     fail(id, `unknown strategy "${q.strategy}" - expected one of: ${STRATEGIES.join(", ")}`)
   }
