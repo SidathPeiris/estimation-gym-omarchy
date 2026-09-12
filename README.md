@@ -88,7 +88,7 @@ incentive.
 
 The same puzzle runs as an installable web app:
 
-**<https://sidathpeiris.github.io/estimation-gym-app/>**
+**<https://estimationgym.app/>**
 
 It shows the same question on the same day and scores it identically. Install it
 to your home screen and it plays offline.
