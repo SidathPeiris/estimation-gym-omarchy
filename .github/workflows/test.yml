@@ -1,0 +1,28 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # No dependencies to install - both suites are plain node on purpose, so
+      # a question contributor can run them locally without a toolchain.
+      - name: Scoring, streak and calibration logic
+        run: node Model.test.js
+
+      - name: Question bank schema and sanity
+        run: node questions.test.js
