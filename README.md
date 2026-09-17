@@ -1,5 +1,16 @@
 # Estimation Gym
 
+> **This plugin is finished.** It does what it set out to do, and the version
+> here is the final one — no further changes are planned.
+>
+> Finished is not abandoned. It has no server, no network calls and no
+> dependencies to rot, so it keeps working for as long as Quickshell does.
+> Install it and play.
+>
+> New questions and new features now go to the web app instead:
+> **<https://estimationgym.app/>** ·
+> [source](https://github.com/SidathPeiris/estimation-gym-app)
+
 **A daily Fermi-estimation puzzle for the [Omarchy](https://omarchy.org) shell
 bar. One question a day, scored on how close you get in powers of ten.**
 

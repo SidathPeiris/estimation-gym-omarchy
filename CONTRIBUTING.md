@@ -1,15 +1,24 @@
 # Contributing
 
+> **This plugin is finished and this repository is archived**, so it can no
+> longer take issues or pull requests. Nothing here is broken — it simply has
+> the shape it was aiming for.
+>
+> **Questions are still very welcome**, they just go to the web app now, which
+> is where the bank is maintained:
+>
+> - **Easiest** — open <https://estimationgym.app/>, expand **Suggest a
+>   question**, and send it from there. No account and no git.
+> - **By pull request** — add it to `core/questions.js` in
+>   [estimation-gym-app](https://github.com/SidathPeiris/estimation-gym-app).
+>
+> Everything below still describes how the plugin works and what makes a good
+> question, and the guidance on writing one applies to the app unchanged — the
+> two share a question format. It is kept here as documentation of a finished
+> thing rather than as an invitation.
+
 The most useful thing you can add is **questions**. The bank is a plain data
 file, so adding one needs no build tooling and no knowledge of QML.
-
-Two ways in:
-
-- **No git required** — open a
-  [question suggestion issue](../../issues/new?template=suggest-a-question.yml)
-  and someone will turn it into a pull request.
-- **Pull request** — edit `content/questions.js` directly, following the format
-  below.
 
 ## What makes a good question
 
@@ -198,7 +207,17 @@ presentation in `Widget.qml`.
 
 ## A note on the web app
 
-The [companion web app](https://github.com/SidathPeiris/estimation-gym-app)
-vendors `Model.js` and `content/questions.js` from this repo verbatim. **This
-repo is the source of truth** — question changes belong here, and the app picks
-them up with its own sync script.
+`Model.js` and `content/questions.js` were once copied from here into the
+[web app](https://github.com/SidathPeiris/estimation-gym-app) verbatim, and for
+a while this repo was described as the source of truth for both.
+
+That is no longer the case, and the direction is now reversed: **the app owns
+the scoring logic and the question bank**, and this plugin holds a final copy
+of them. There is no sync script any more and nothing will be copied in either
+direction again.
+
+The two banks are identical today, so both surfaces serve the same question on
+the same day until **4 June 2029** — the last day the shared thousand-question
+bank covers. On 5 June 2029 the schedule wraps back to the first question, and
+from then on the plugin repeats its thousand while the app carries on into
+whatever has been added since.
